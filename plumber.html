@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Response Tool</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 24px; 
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1f2937; margin-bottom: 8px; }
+        .subtitle { color: #6b7280; font-size: 14px; margin-bottom: 20px; }
+        label { 
+            display: block; 
+            font-weight: 600; 
+            margin-bottom: 8px; 
+            color: #374151;
+            font-size: 14px;
+        }
+        textarea, input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        textarea { 
+            min-height: 120px; 
+            resize: vertical;
+            margin-bottom: 16px;
+        }
+        input[type="password"] {
+            margin-bottom: 8px;
+        }
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background: #2563eb; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        button:hover { background: #1d4ed8; }
+        button:disabled { background: #9ca3af; cursor: not-allowed; }
+        .response-box { 
+            background: linear-gradient(135deg, #ecfdf5 0%, #dbeafe 100%);
+            border: 2px solid #10b981; 
+            padding: 16px; 
+            border-radius: 8px;
+            margin-top: 16px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .examples { 
+            display: flex; 
+            gap: 8px; 
+            flex-wrap: wrap; 
+            margin-bottom: 12px;
+        }
+        .example-btn {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 12px;
+            background: #f3f4f6;
+            color: #374151;
+            margin: 0;
+        }
+        .example-btn:hover { background: #e5e7eb; }
+        .pricing { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .price-item { 
+            background: #f9fafb; 
+            padding: 12px; 
+            border-radius: 8px; 
+            text-align: center;
+        }
+        .price-item.no { 
+            background: #fef2f2; 
+            border: 1px solid #fca5a5;
+        }
+        .price-label { font-size: 12px; font-weight: 600; color: #4b5563; }
+        .price-value { font-size: 20px; font-weight: bold; color: #2563eb; margin-top: 4px; }
+        .price-item.no .price-value { color: #dc2626; font-size: 14px; }
+        .info-banner { 
+            background: #dbeafe; 
+            border-left: 4px solid #2563eb; 
+            padding: 12px; 
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #1e40af;
+        }
+        .api-setup {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .api-setup a { color: #2563eb; text-decoration: underline; }
+        .help-text { font-size: 12px; color: #6b7280; margin-top: 4px; }
+        .copy-btn {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        .success { 
+            background: #d1fae5; 
+            border: 1px solid #10b981; 
+            padding: 12px; 
+            border-radius: 8px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #065f46;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🔧 Quick Response</h1>
+            <p class="subtitle">Reply to Thumbtack leads in seconds</p>
+            
+            <div id="apiSetup" class="api-setup">
+                <strong>⚙️ Setup Required:</strong>
+                <p style="margin: 8px 0;">Get your free Gemini API key: <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a></p>
+                <input type="password" id="apiKey" placeholder="Paste your API key here...">
+                <p class="help-text">Saved in your browser only</p>
+            </div>
+
+            <div class="info-banner">
+                <strong>Service Area:</strong> Greater Indianapolis • <strong>Response Time:</strong> ~1 hour • <strong>Services:</strong> All plumbing except water heaters
+            </div>
+
+            <label>Quick Examples:</label>
+            <div class="examples">
+                <button class="example-btn" onclick="setExample(0)">Emergency Pipe</button>
+                <button class="example-btn" onclick="setExample(1)">Water Heater</button>
+                <button class="example-btn" onclick="setExample(2)">Drain Cleaning</button>
+            </div>
+
+            <label>Customer Message from Thumbtack:</label>
+            <textarea id="inquiry" placeholder="Paste the customer's message here..."></textarea>
+
+            <button onclick="generateResponse()" id="genBtn">✉️ Generate Response</button>
+
+            <div id="responseArea" style="display:none;">
+                <div class="response-box" id="response"></div>
+                <button class="copy-btn" onclick="copyResponse()">📋 Copy to Clipboard</button>
+                <div class="success">✓ Review it, then copy and paste into Thumbtack!</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <label>Quick Pricing Reference:</label>
+            <div class="pricing">
+                <div class="price-item">
+                    <div class="price-label">Water Softener</div>
+                    <div class="price-value">$500</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Pipe Repair</div>
+                    <div class="price-value">$200</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Faucet Install</div>
+                    <div class="price-value">$150</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Toilet Repair</div>
+                    <div class="price-value">$175</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Drain Cleaning</div>
+                    <div class="price-value">$125</div>
+                </div>
+                <div class="price-item no">
+                    <div class="price-label">⚠️ Water Heaters</div>
+                    <div class="price-value">Not offered</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; color: white; font-size: 12px; margin-top: 16px;">
+            Powered by Google Gemini (Free)
+        </div>
+    </div>
+
+    <script>
+        const examples = [
+            "Hi, I have a burst pipe in my basement and water is everywhere! I'm in Carmel near 116th St. Can you come out today? What would this cost?",
+            "Looking to get my water heater replaced. It's about 12 years old and leaking from the bottom. I'm in Fishers. Can you give me a quote?",
+            "My kitchen sink is draining really slow. Think it might be clogged. I'm in downtown Indy. Can you help?"
+        ];
+
+        function setExample(index) {
+            document.getElementById('inquiry').value = examples[index];
+        }
+
+        async function generateResponse() {
+            const inquiry = document.getElementById('inquiry').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const btn = document.getElementById('genBtn');
+            const responseArea = document.getElementById('responseArea');
+            const responseDiv = document.getElementById('response');
+
+            if (!inquiry) {
+                alert('Please paste a customer message first!');
+                return;
+            }
+
+            if (!apiKey) {
+                alert('Please add your Gemini API key first!');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Generating...';
+            responseArea.style.display = 'none';
+
+            const prompt = `You are helping a plumber respond to lead inquiries from Thumbtack. Generate a professional, friendly response that sounds conversational and natural.
+
+CRITICAL BUSINESS DETAILS:
+- Service area: Greater Indianapolis area
+- Response time: Typically responds within 1 hour
+- Specialties: All plumbing work EXCEPT water heater installation/replacement
+- Pricing:
+  * Water softener install: $500
+  * Pipe repair: $200
+  * Faucet installation: $150
+  * Toilet repair: $175
+  * Drain cleaning: $125
+  * (Does NOT do water heater installs - refer these out)
+
+COMMUNICATION STYLE:
+- Use phrases like "I totally get it" and "I can't speak to [topic] without seeing it"
+- Sound friendly, conversational, and professional
+- Be honest about what you do and don't do
+
+RESPONSE STRUCTURE:
+1. Acknowledge their issue with empathy
+2. If it's a water heater job, politely decline and maybe suggest they find a specialist
+3. If it's something you do, ask 2-3 clarifying questions
+4. Mention your typical response time and availability
+5. Give relevant pricing if applicable
+6. End with clear next step
+
+Customer inquiry:
+${inquiry}
+
+Write a response (3-4 short paragraphs max) that sounds like a real plumber texting back, not a corporate email. Be direct and helpful.`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.7, maxOutputTokens: 800 }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    responseDiv.textContent = 'Error: ' + data.error.message + '\n\nCheck your API key.';
+                } else if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    responseDiv.textContent = data.candidates[0].content.parts[0].text;
+                    localStorage.setItem('geminiApiKey', apiKey);
+                    document.getElementById('apiSetup').style.display = 'none';
+                } else {
+                    responseDiv.textContent = 'Could not generate response. Please try again.';
+                }
+
+                responseArea.style.display = 'block';
+            } catch (error) {
+                responseDiv.textContent = 'Error connecting to Gemini API. Check your internet connection.';
+                responseArea.style.display = 'block';
+            }
+
+            btn.disabled = false;
+            btn.textContent = '✉️ Generate Response';
+        }
+
+        function copyResponse() {
+            const text = document.getElementById('response').textContent;
+            navigator.clipboard.writeText(text);
+            alert('Copied to clipboard!');
+        }
+
+        // Load saved API key
+        window.onload = function() {
+            const saved = localStorage.getItem('geminiApiKey');
+            if (saved) {
+                document.getElementById('apiKey').value = saved;
+                document.getElementById('apiSetup').style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>
